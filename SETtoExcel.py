@@ -87,10 +87,13 @@ def main():
     SET_header = []
     mai_header = []
 
+    #join ca.crt and ca.key
+    selenium_wire_storage = os.path.join(os.getcwd(), "selenium_wire")
+
     # setting up the webdriver
     chromeOptions = webdriver.ChromeOptions()
     chromeOptions.add_argument("--headless")
-    seleniumwireOptions = {"disable_encoding": "True", "request_storage_base_dir": rf"{os.getcwd()}"}
+    seleniumwireOptions = {"disable_encoding": "True", "request_storage_base_dir": selenium_wire_storage}
     driver = webdriver.Chrome(options=chromeOptions, seleniumwire_options=seleniumwireOptions)
 
     # request SET data
@@ -104,41 +107,44 @@ def main():
                 body_str = body.decode()
                 dataDict = json.loads(body_str)
                 subIndices_list = dataDict["composition"]["subIndices"]
-
+                
                 # insert data into lists
                 for sector in subIndices_list:
-                    for stock in sector["stockInfos"]:
-                        SET_symbol.append(stock["symbol"])
-                        SET_sign.append(stock["sign"])
-                        SET_prior.append(twoDecimal(stock["prior"]))
-                        SET_last.append(twoDecimal(stock["last"]))
-                        SET_percentChange.append(percentSign(twoDecimal(stock["percentChange"])))
-                        SET_open.append(twoDecimal(stock["open"]))
-                        SET_high.append(twoDecimal(stock["high"]))
-                        SET_low.append(twoDecimal(stock["low"]))
-                        SET_average.append(twoDecimal(stock["average"]))
-                        SET_change.append(twoDecimal(stock["change"]))
-                        SET_high52Weeks.append(twoDecimal(stock["high52Weeks"]))
-                        SET_low52Weeks.append(twoDecimal(stock["low52Weeks"]))
-                        SET_totalVolume.append(twoDecimal(unitK(stock["totalVolume"])))
-                        SET_aomVolume.append(twoDecimal(unitK(stock["aomVolume"])))
+                    if sector["stockInfos"]:
+                        for stock in sector["stockInfos"]:
+                            SET_symbol.append(stock["symbol"])
+                            SET_sign.append(stock["sign"])
+                            SET_prior.append(twoDecimal(stock["prior"]))
+                            SET_last.append(twoDecimal(stock["last"]))
+                            SET_percentChange.append(percentSign(twoDecimal(stock["percentChange"])))
+                            SET_open.append(twoDecimal(stock["open"]))
+                            SET_high.append(twoDecimal(stock["high"]))
+                            SET_low.append(twoDecimal(stock["low"]))
+                            SET_average.append(twoDecimal(stock["average"]))
+                            SET_change.append(twoDecimal(stock["change"]))
+                            SET_high52Weeks.append(twoDecimal(stock["high52Weeks"]))
+                            SET_low52Weeks.append(twoDecimal(stock["low52Weeks"]))
+                            SET_totalVolume.append(twoDecimal(unitK(stock["totalVolume"])))
+                            SET_aomVolume.append(twoDecimal(unitK(stock["aomVolume"])))
 
-                        totalValue = twoDecimal(unitK(stock["totalValue"]))
-                        SET_totalValue.append(totalValue)
+                            totalValue = twoDecimal(unitK(stock["totalValue"]))
+                            SET_totalValue.append(totalValue)
 
-                        aomValue = twoDecimal(unitK(stock["aomValue"]))
-                        SET_aomValue.append(aomValue)
+                            aomValue = twoDecimal(unitK(stock["aomValue"]))
+                            SET_aomValue.append(aomValue)
 
-                        if totalValue == "-" or aomValue == "-":
-                            SET_OBT_BigLot.append("-")
+                            if totalValue == "-" or aomValue == "-":
+                                SET_OBT_BigLot.append("-")
+                            else:
+                                SET_OBT_BigLot.append(twoDecimal(unitK(totalValue - aomValue)))
+                            SET_marketCap.append(twoDecimal(unitM(stock["marketCap"])))
+                            SET_pbRatio.append(twoDecimal(stock["pbRatio"]))
+                            SET_dividend.append(percentSign(twoDecimal(stock["dividendYield"])))
+                            SET_nvdrVolume.append(stock["nvdrNetVolume"])
+                            SET_industryName.append(stock["industryName"])
+                            SET_sectorName.append(stock["sectorName"])
                         else:
-                            SET_OBT_BigLot.append(twoDecimal(unitK(totalValue - aomValue)))
-                        SET_marketCap.append(twoDecimal(unitM(stock["marketCap"])))
-                        SET_pbRatio.append(twoDecimal(stock["pbRatio"]))
-                        SET_dividend.append(percentSign(twoDecimal(stock["dividendYield"])))
-                        SET_nvdrVolume.append(stock["nvdrNetVolume"])
-                        SET_industryName.append(stock["industryName"])
-                        SET_sectorName.append(stock["sectorName"])
+                            continue
 
     driver.quit()
 
@@ -147,7 +153,8 @@ def main():
     # setting up the webdriver
     chromeOptions = webdriver.ChromeOptions()
     chromeOptions.add_argument("--headless")
-    seleniumwireOptions = {"disable_encoding": "True", "request_storage_base_dir": rf"{os.getcwd()}"}
+    selenium_wire_storage = os.path.join(os.getcwd(), "selenium_wire")
+    seleniumwireOptions = {"disable_encoding": "True", "request_storage_base_dir": selenium_wire_storage}
     driver = webdriver.Chrome(options=chromeOptions, seleniumwire_options=seleniumwireOptions)
 
     # request mai data
@@ -163,37 +170,38 @@ def main():
 
                 # insert data into lists
                 for stock in dataDict["composition"]["stockInfos"]:
-                    mai_symbol.append(stock["symbol"])
-                    mai_sign.append(stock["sign"])
-                    mai_prior.append(twoDecimal(stock["prior"]))
-                    mai_last.append(twoDecimal(stock["last"]))
-                    mai_percentChange.append(percentSign(twoDecimal(stock["percentChange"])))
-                    mai_open.append(twoDecimal(stock["open"]))
-                    mai_high.append(twoDecimal(stock["high"]))
-                    mai_low.append(twoDecimal(stock["low"]))
-                    mai_average.append(twoDecimal(stock["average"]))
-                    mai_change.append(twoDecimal(stock["change"]))
-                    mai_high52Weeks.append(twoDecimal(stock["high52Weeks"]))
-                    mai_low52Weeks.append(twoDecimal(stock["low52Weeks"]))
-                    mai_totalVolume.append(twoDecimal(unitK(stock["totalVolume"])))
-                    mai_aomVolume.append(twoDecimal(unitK(stock["aomVolume"])))
+                    if stock is not None:
+                        mai_symbol.append(stock["symbol"])
+                        mai_sign.append(stock["sign"])
+                        mai_prior.append(twoDecimal(stock["prior"]))
+                        mai_last.append(twoDecimal(stock["last"]))
+                        mai_percentChange.append(percentSign(twoDecimal(stock["percentChange"])))
+                        mai_open.append(twoDecimal(stock["open"]))
+                        mai_high.append(twoDecimal(stock["high"]))
+                        mai_low.append(twoDecimal(stock["low"]))
+                        mai_average.append(twoDecimal(stock["average"]))
+                        mai_change.append(twoDecimal(stock["change"]))
+                        mai_high52Weeks.append(twoDecimal(stock["high52Weeks"]))
+                        mai_low52Weeks.append(twoDecimal(stock["low52Weeks"]))
+                        mai_totalVolume.append(twoDecimal(unitK(stock["totalVolume"])))
+                        mai_aomVolume.append(twoDecimal(unitK(stock["aomVolume"])))
 
-                    totalValue = twoDecimal(unitK(stock["totalValue"]))
-                    mai_totalValue.append(totalValue)
+                        totalValue = twoDecimal(unitK(stock["totalValue"]))
+                        mai_totalValue.append(totalValue)
 
-                    aomValue = twoDecimal(unitK(stock["aomValue"]))
-                    mai_aomValue.append(aomValue)
+                        aomValue = twoDecimal(unitK(stock["aomValue"]))
+                        mai_aomValue.append(aomValue)
 
-                    if totalValue == "-" or aomValue == "-":
-                        mai_OBT_BigLot.append("-")
-                    else:
-                        mai_OBT_BigLot.append(twoDecimal(unitK(totalValue - aomValue)))
-                    mai_marketCap.append(twoDecimal(unitM(stock["marketCap"])))
-                    mai_pbRatio.append(twoDecimal(stock["pbRatio"]))
-                    mai_dividend.append(percentSign(twoDecimal(stock["dividendYield"])))
-                    mai_nvdrVolume.append(stock["nvdrNetVolume"])
-                    mai_industryName.append(stock["industryName"])
-                    mai_sectorName.append(stock["sectorName"])
+                        if totalValue == "-" or aomValue == "-":
+                            mai_OBT_BigLot.append("-")
+                        else:
+                            mai_OBT_BigLot.append(twoDecimal(unitK(totalValue - aomValue)))
+                        mai_marketCap.append(twoDecimal(unitM(stock["marketCap"])))
+                        mai_pbRatio.append(twoDecimal(stock["pbRatio"]))
+                        mai_dividend.append(percentSign(twoDecimal(stock["dividendYield"])))
+                        mai_nvdrVolume.append(stock["nvdrNetVolume"])
+                        mai_industryName.append(stock["industryName"])
+                        mai_sectorName.append(stock["sectorName"])
 
     # append list of headers into a single list (use this list to loop)
     SET_header.append(SET_symbol)
@@ -289,6 +297,8 @@ def main():
     # close()
     workbook.close()
     driver.quit()
+
+    del driver.requests
 
 ########## END OF main() ##########
 
